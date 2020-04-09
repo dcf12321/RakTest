@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/timeb.h>
 
 
 bool StartRakNetServer(int port, int broadcastInterval, const char* broadcastMsg, int broadcastMsgLen)
@@ -63,11 +64,17 @@ bool StartRakNetServer(int port, int broadcastInterval, const char* broadcastMsg
 	printf("\nMy GUID is %s\n", server->GetGuidFromSystemAddress(RakNet::UNASSIGNED_SYSTEM_ADDRESS).ToString());
 
 	// Loop for input
+	char msg[100];
 	while (1)
 	{
 		// This sleep keeps RakNet responsive
 		RakSleep(broadcastInterval);
-		server->Send(broadcastMsg, broadcastMsgLen, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true);
+		struct timeb tb;
+    	ftime(&tb);
+     	snprintf(msg, sizeof(msg), "%d", (int)tb.time);
+     	printf("time:%s\n", msg);
+     	broadcastMsgLen = strlen(msg);
+		server->Send(msg, broadcastMsgLen, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true);
 	}
 
 	server->Shutdown(300);
